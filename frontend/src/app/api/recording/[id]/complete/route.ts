@@ -1,0 +1,22 @@
+import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const body = await req.json()
+  const { id } = await params
+
+  const completeProcessing = await prisma.video.update({
+    where: {
+      userId: id,
+      source: body.filename,
+    },
+    data: {
+      processing: false,
+    },
+  })
+  if (completeProcessing) {
+    return NextResponse.json({ status: 200 })
+  }
+
+  return NextResponse.json({ status: 400 })
+}
