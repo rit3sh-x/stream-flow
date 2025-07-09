@@ -4,8 +4,6 @@ import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  console.log('Enpoint hit ✅')
-
   const { id } = await params;
 
   try {
@@ -21,7 +19,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (userProfile) {
       const { has } = await auth();
       const hasPro = has({ plan: 'pro' });
-      return NextResponse.json({ status: 200, user: { ...userProfile, hasPro } })
+      return NextResponse.json({
+        status: 200,
+        user: {
+          userProfile,
+          hasPro
+        }
+      })
     }
 
     const clerk = await clerkClient();
@@ -45,9 +49,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     })
 
     if (createUser) return NextResponse.json({ status: 201, user: { ...createUser, hasPro: false } })
-
-    return NextResponse.json({ status: 400 })
+    return NextResponse.json({ status: 400 });
   } catch (error) {
-    console.log('ERROR', error)
+    return NextResponse.json({ status: 400, error })
   }
 }

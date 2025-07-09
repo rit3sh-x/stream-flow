@@ -1,26 +1,26 @@
 import { prisma } from '@/lib/prisma'
 import axios from 'axios'
-import { auth } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const body = await req.json()
+  const { filename } = await req.json()
   const { id } = await params
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: id },
-      select: { trial: true },
+      where: { clerkid: id },
+      select: {
+        trial: true,
+        plan: true,
+        id: true,
+      },
     })
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    const { has } = await auth();
-    const hasPro = has({ plan: 'pro' });
-
-    const isEligible = hasPro || user.trial
+    const isEligible = user.plan == "PRO" || user.trial;
 
     if (!isEligible) {
       return NextResponse.json(
@@ -31,8 +31,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const video = await prisma.video.findFirst({
       where: {
-        userId: id,
-        source: body.filename,
+        userId: user.id,
+        source: filename,
       },
     })
 
@@ -71,8 +71,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     return NextResponse.json({
       status: 200,
-      message: 'Transcription request submitted successfully',
-      transcriptionId: initialResponse.data.id
+      message: 'Transcription request submitted successfully'
     });
 
   } catch (error) {

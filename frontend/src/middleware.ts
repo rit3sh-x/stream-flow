@@ -40,6 +40,10 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   const isInternalApp = isInternalElectronApp(appKey)
   const shouldAllowCors = isAllowedOrigin || isInternalApp
 
+  if (req.nextUrl.pathname.startsWith('/api/webhooks/')) {
+    return NextResponse.next()
+  }
+
   if (req.method === 'OPTIONS') {
     const headers = createCorsHeaders(origin, shouldAllowCors)
     return NextResponse.json({}, { headers })

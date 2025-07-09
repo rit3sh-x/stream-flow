@@ -1,17 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const body = await req.json()
+    const { filename } = await req.json()
     const { id } = await params
-    const { has } = await auth();
-    const hasPro = has({ plan: 'pro' });
 
     const personalworkspaceId = await prisma.user.findUnique({
       where: {
-        id,
+        clerkid: id,
       },
       select: {
         workspace: {
@@ -24,7 +21,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           orderBy: {
             createdAt: 'asc',
           },
-        },
+        }
       },
     })
     const startProcessingVideo = await prisma.workSpace.update({
@@ -34,7 +31,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       data: {
         videos: {
           create: {
-            source: body.filename,
+            source: filename,
             userId: id,
           },
         },
@@ -43,12 +40,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (startProcessingVideo) {
       return NextResponse.json({
-        status: 200,
-        plan: hasPro ? "PRO" : "FREE",
+        status: 200
       })
     }
-    return NextResponse.json({ status: 400 })
+    return NextResponse.json({ status: 400 });
   } catch (error) {
     console.log('🔴 Error in processing video', error)
+    return NextResponse.json({ status: 400 });
   }
 }
