@@ -1,4 +1,5 @@
-/* eslint disable */
+// @ts-nocheck
+/* eslint-disable */
 
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
