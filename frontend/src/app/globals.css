@@ -117,12 +117,24 @@
 }
 
 @layer base {
-  *, ::before, ::after {
+
+  *,
+  ::before,
+  ::after {
     @apply border-border outline-ring/50;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer base {
+
+  button:not([disabled]),
+  [role="button"]:not([disabled]) {
+    cursor: pointer;
   }
 }
 
@@ -196,4 +208,8 @@
 
 .custom-scroll::-webkit-scrollbar-corner {
   background: transparent !important;
+}
+
+.animate-in {
+  animation: animate-in 0.5s ease-out;
 }
